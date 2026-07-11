@@ -21,6 +21,9 @@ class MainActivity : ComponentActivity() {
         dao.insert(Alarm(hour = 4, minute = 30, label = "Fajr"))
         val alarms = dao.getAll()
 
+        val scheduler = AlarmScheduler(this)
+        scheduler.schedule(alarms.last(), System.currentTimeMillis() + 10_000)
+
         val summary = "Hazm — ${alarms.size} alarm(s) saved:\n" +
                 alarms.joinToString("\n") { "${it.label} @ ${it.hour}:${it.minute}" }
 
