@@ -1,5 +1,6 @@
 plugins {
     id("com.android.application")
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -17,4 +18,10 @@ android {
     buildTypes {
         getByName("release") { isMinifyEnabled = false }
     }
+}
+
+dependencies {
+    implementation("androidx.room:room-runtime:2.8.2")
+    implementation("androidx.room:room-ktx:2.8.2")
+    ksp("androidx.room:room-compiler:2.8.2")
 }

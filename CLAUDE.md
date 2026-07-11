@@ -53,6 +53,6 @@ Boss fight: OEM battery-killers (Xiaomi/Realme/Oppo/Vivo/Samsung) → battery-op
 
 ## CURRENT STEP
 Step 1 — wire in Compose, then add a Room alarm entity + DAO.
-Env: this Codespace has no local JDK/gh; push via PAT →
+Env: this Codespace has no local JDK/gh; push via PAT → 
 `git config --global credential.helper store`, then `git push` (PAT as the password).
 Next action: <update this line at session end>.
