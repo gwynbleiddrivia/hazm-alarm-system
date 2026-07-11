@@ -5,7 +5,7 @@ plugins {
 android {
     namespace = "com.dreyfus.hazm"
     compileSdk = 35
-
+ 
     defaultConfig {
         applicationId = "com.dreyfus.hazm"
         minSdk = 26
