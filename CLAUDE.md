@@ -21,7 +21,14 @@ they're awake. Package `com.dreyfus.hazm`, Gradle root `hazmAlarm`.
 - minSdk 26, compile/target SDK **35**, Gradle **9.4.1**. CI: temurin **21** + setup-android.
 - Compose: apply `org.jetbrains.kotlin.plugin.compose` @ **2.2.10** + `buildFeatures{compose=true}`
   + Compose BOM. (Compose 1.12+ needs compileSdk 37 — bump only if a BOM demands it.)
-- Room: **KSP** `com.google.devtools.ksp` @ **2.2.10-2.0.2**; `ksp("androidx.room:room-compiler")`.
+- Room **2.8.4** (Google Maven, not Central): **KSP** `com.google.devtools.ksp` @ **2.2.10-2.0.2**;
+  `ksp("androidx.room:room-compiler")`. Plugin **version** goes in ROOT `build.gradle.kts`
+  (`apply false`); the app module applies the bare `id(...)` (no version, no `apply false`).
+- **AGP 9 + KSP gotcha:** needs `android.disallowKotlinSourceSets=false` in `gradle.properties`
+  (KSP registers generated sources via the old `kotlin.sourceSets` DSL that built-in Kotlin blocks).
+- Node.js-20-deprecation lines in CI = harmless GitHub Actions runner warning, not our code.
+- Diagnose CI failures without the user: pull the run log via the stored PAT →
+  `curl -H "Authorization: token <PAT>" .../actions/jobs/<id>/logs`.
 
 ## The reliable-alarm core — 6-link chain (north star)
 1. SCHEDULE `AlarmManager.setAlarmClock()` + `USE_EXACT_ALARM`
@@ -36,7 +43,9 @@ Boss fight: OEM battery-killers (Xiaomi/Realme/Oppo/Vivo/Samsung) → battery-op
 
 ## Build order
 - [x] 0 Skeleton + CI (done: APK installs on phone)
-- [ ] 1 Compose wired in + Room alarm entity + DAO (save & read one alarm)  ← NOW
+- [x] 1 Room alarm entity + DAO — save & read one alarm (CI GREEN, APK builds;
+      final phone check = alarm count climbs each launch = persistence proven)
+- [ ] 1.5 Wire in Jetpack Compose (deferred from Step 1: AGP9/Compose version risk)  ← NEXT
 - [ ] 2 AlarmScheduler wrapping setAlarmClock (fires, logs on receive)
 - [ ] 3 Full-screen Activity over the locked screen
 - [ ] 4 Foreground service: sound + vibrate + wakelock
@@ -52,7 +61,11 @@ Boss fight: OEM battery-killers (Xiaomi/Realme/Oppo/Vivo/Samsung) → battery-op
 - `USE_EXACT_ALARM` = install-granted, non-revocable; app qualifies (its core is alarms).
 
 ## CURRENT STEP
-Step 1 — wire in Compose, then add a Room alarm entity + DAO.
-Env: this Codespace has no local JDK/gh; push via PAT → 
-`git config --global credential.helper store`, then `git push` (PAT as the password).
-Next action: <update this line at session end>.
+Step 1 DONE — Room `Alarm` entity + `AlarmDao` + `AppDatabase`; MainActivity inserts one
+alarm and shows all on a plain TextView (static text `Fajr @ 4:30` on phone = working;
+count climbs each launch = persistence proven). CI GREEN, produces `app-debug-apk`.
+Files: `app/src/main/java/com/dreyfus/hazm/{Alarm,AlarmDao,AppDatabase,MainActivity}.kt`.
+Note: `MainActivity` uses `.allowMainThreadQueries()` — TEMP, move DB off UI thread later.
+Env: Codespace has no local JDK/gh; push via PAT (creds stored). Git-LFS hooks were
+removed from `.git/hooks` (LFS not installed / not used).
+NEXT: Step 1.5 — wire in Jetpack Compose (minimal @Composable screen), one CI push.
