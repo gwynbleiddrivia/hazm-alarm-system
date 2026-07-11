@@ -45,8 +45,9 @@ Boss fight: OEM battery-killers (Xiaomi/Realme/Oppo/Vivo/Samsung) → battery-op
 - [x] 0 Skeleton + CI (done: APK installs on phone)
 - [x] 1 Room alarm entity + DAO — save & read one alarm (CI GREEN, APK builds;
       final phone check = alarm count climbs each launch = persistence proven)
-- [ ] 1.5 Wire in Jetpack Compose (deferred from Step 1: AGP9/Compose version risk)  ← NEXT
-- [ ] 2 AlarmScheduler wrapping setAlarmClock (fires, logs on receive)
+- [x] 1.5 Wire in Jetpack Compose (CI GREEN, APK installs; Compose `Text` renders the
+      alarm summary, count still climbs each launch = Room intact through the swap)
+- [ ] 2 AlarmScheduler wrapping setAlarmClock (fires, logs on receive)  ← NEXT
 - [ ] 3 Full-screen Activity over the locked screen
 - [ ] 4 Foreground service: sound + vibrate + wakelock
 - [ ] 5 Dismiss path (stop service, cancel notification)
@@ -61,11 +62,18 @@ Boss fight: OEM battery-killers (Xiaomi/Realme/Oppo/Vivo/Samsung) → battery-op
 - `USE_EXACT_ALARM` = install-granted, non-revocable; app qualifies (its core is alarms).
 
 ## CURRENT STEP
-Step 1 DONE — Room `Alarm` entity + `AlarmDao` + `AppDatabase`; MainActivity inserts one
-alarm and shows all on a plain TextView (static text `Fajr @ 4:30` on phone = working;
-count climbs each launch = persistence proven). CI GREEN, produces `app-debug-apk`.
+Step 1.5 DONE — Jetpack Compose wired in. `MainActivity` now extends `ComponentActivity`
+and uses `setContent { HazmScreen(summary) }`; `HazmScreen` = `MaterialTheme { Surface {
+Text(summary) } }` (material3). Room logic unchanged; on phone `Fajr @ 4:30` renders via
+Compose and the count climbs each launch = persistence intact through the swap.
+Compose wiring: root `build.gradle.kts` has `org.jetbrains.kotlin.plugin.compose` @ 2.2.10
+`apply false`; app applies bare `id(...)`, has `buildFeatures { compose = true }`, and deps
+`compose-bom:2024.12.01` (Compose 1.7.6, safe on compileSdk 35) + `material3` +
+`activity-compose:1.9.3`. No `kotlinCompilerExtensionVersion` (Kotlin-2.x plugin handles it).
+CI GREEN, produces `app-debug-apk`.
 Files: `app/src/main/java/com/dreyfus/hazm/{Alarm,AlarmDao,AppDatabase,MainActivity}.kt`.
 Note: `MainActivity` uses `.allowMainThreadQueries()` — TEMP, move DB off UI thread later.
 Env: Codespace has no local JDK/gh; push via PAT (creds stored). Git-LFS hooks were
 removed from `.git/hooks` (LFS not installed / not used).
-NEXT: Step 1.5 — wire in Jetpack Compose (minimal @Composable screen), one CI push.
+NEXT: Step 2 — AlarmScheduler wrapping `AlarmManager.setAlarmClock()` + `USE_EXACT_ALARM`;
+a lightweight `AlarmReceiver` trampoline that just logs on receive (chain links 1 & 3).
